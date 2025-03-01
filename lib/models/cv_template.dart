@@ -6,12 +6,14 @@ class CVTemplate {
   final String thumbnailPath;
   final String category;
   final bool isFavorite;
+  final String style;
 
-  CVTemplate({
+  const CVTemplate({
     required this.name,
     required this.thumbnailPath,
     required this.category,
     this.isFavorite = false,
+    required this.style,
   });
 
   CVTemplate copyWith({
@@ -19,12 +21,14 @@ class CVTemplate {
     String? thumbnailPath,
     String? category,
     bool? isFavorite,
+    String? style,
   }) {
     return CVTemplate(
       name: name ?? this.name,
       thumbnailPath: thumbnailPath ?? this.thumbnailPath,
       category: category ?? this.category,
       isFavorite: isFavorite ?? this.isFavorite,
+      style: style ?? this.style,
     );
   }
 
@@ -53,7 +57,8 @@ class CVTemplate {
         return CVTemplate(
           name: formattedName,
           thumbnailPath: path,
-          category: 'Template', // You can modify this based on your needs
+          category: 'Template',
+          style: name.toLowerCase(),
         );
       }).toList();
 

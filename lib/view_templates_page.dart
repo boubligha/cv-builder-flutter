@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 import 'models/cv_template.dart';
 import 'template_preview_page.dart';
+import 'contact_info_page.dart';
 
 class ViewTemplatesPage extends StatefulWidget {
-  const ViewTemplatesPage({super.key});
+  final bool isSelecting;
+  final Map<String, dynamic>? userInfo;
+
+  const ViewTemplatesPage({super.key, this.isSelecting = false, this.userInfo});
 
   @override
   State<ViewTemplatesPage> createState() => _ViewTemplatesPageState();
@@ -58,6 +62,29 @@ class _ViewTemplatesPageState extends State<ViewTemplatesPage> {
         filterTemplates('Favorites');
       }
     });
+  }
+
+  void _handleTemplateSelection(CVTemplate template) {
+    if (widget.isSelecting) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => ContactInfoPage(selectedTemplate: template),
+        ),
+      );
+    } else {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder:
+              (context) => TemplatePreviewPage(
+                template: template,
+                onTemplateFavoriteChanged: _handleTemplateFavoriteChanged,
+                userInfo: widget.userInfo ?? {},
+              ),
+        ),
+      );
+    }
   }
 
   @override
@@ -159,6 +186,7 @@ class _ViewTemplatesPageState extends State<ViewTemplatesPage> {
                         template: template,
                         onTemplateFavoriteChanged:
                             _handleTemplateFavoriteChanged,
+                        userInfo: widget.userInfo ?? {},
                       ),
                 ),
               ).then((selectedTemplate) {
@@ -226,9 +254,7 @@ class _ViewTemplatesPageState extends State<ViewTemplatesPage> {
             child: IconButton(
               icon: const Icon(Icons.add_circle),
               color: Colors.grey[700],
-              onPressed: () {
-                Navigator.pop(context, template);
-              },
+              onPressed: () => _handleTemplateSelection(template),
             ),
           ),
         ],

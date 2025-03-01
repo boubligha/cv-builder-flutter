@@ -1,14 +1,18 @@
 import 'package:flutter/material.dart';
 import 'models/cv_template.dart';
+import 'services/pdf_generator.dart';
+import 'package:printing/printing.dart';
 
 class TemplatePreviewPage extends StatefulWidget {
   final CVTemplate template;
   final Function(CVTemplate) onTemplateFavoriteChanged;
+  final Map<String, dynamic> userInfo;
 
   const TemplatePreviewPage({
     super.key,
     required this.template,
     required this.onTemplateFavoriteChanged,
+    required this.userInfo,
   });
 
   @override
@@ -53,6 +57,10 @@ class _TemplatePreviewPageState extends State<TemplatePreviewPage> {
               Navigator.pop(context, currentTemplate);
             },
           ),
+          IconButton(
+            icon: const Icon(Icons.download),
+            onPressed: _downloadPDF,
+          ),
         ],
       ),
       body: InteractiveViewer(
@@ -66,5 +74,40 @@ class _TemplatePreviewPageState extends State<TemplatePreviewPage> {
         ),
       ),
     );
+  }
+
+  Future<void> _downloadPDF() async {
+    try {
+      // Show loading indicator
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return const Center(child: CircularProgressIndicator());
+        },
+      );
+
+      // Generate PDF
+      final pdfFile = await PDFGenerator.generateCV(
+        widget.userInfo,
+        currentTemplate.style,
+      );
+
+      // Hide loading indicator
+      Navigator.pop(context);
+
+      // Show PDF preview and download options
+      await Printing.layoutPdf(
+        onLayout: (_) async => pdfFile.readAsBytesSync(),
+      );
+    } catch (e) {
+      // Hide loading indicator
+      Navigator.pop(context);
+      
+      // Show error
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error generating PDF: $e')),
+      );
+    }
   }
 }

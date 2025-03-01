@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'contact_info_page.dart';
 import 'view_templates_page.dart';
 
 class HomePage extends StatelessWidget {
@@ -24,7 +23,8 @@ class HomePage extends StatelessWidget {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => const ContactInfoPage(),
+                    builder:
+                        (context) => const ViewTemplatesPage(isSelecting: true),
                   ),
                 );
               },
@@ -46,7 +46,9 @@ class HomePage extends StatelessWidget {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => const ViewTemplatesPage(),
+                    builder:
+                        (context) =>
+                            const ViewTemplatesPage(isSelecting: false),
                   ),
                 );
               },
