@@ -121,7 +121,7 @@ class AppTheme {
       borderRadius: BorderRadius.circular(12),
     ),
   ).copyWith(
-    backgroundColor: MaterialStateProperty.all(Colors.transparent),
-    foregroundColor: MaterialStateProperty.all(Colors.white),
+    backgroundColor: WidgetStateProperty.all(Colors.transparent),
+    foregroundColor: WidgetStateProperty.all(Colors.white),
   );
 } 

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 class ContactInformationPage extends StatelessWidget {
+  const ContactInformationPage({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -159,6 +161,12 @@ class ContactInformationPage extends StatelessWidget {
               onPressed: () {
                 Navigator.pushNamed(context, '/work_experience');
               },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.black,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
               child: Container(
                 width: double.infinity,
                 padding: EdgeInsets.symmetric(vertical: 16),
@@ -169,12 +177,6 @@ class ContactInformationPage extends StatelessWidget {
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
                   ),
-                ),
-              ),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.black,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
                 ),
               ),
             ),

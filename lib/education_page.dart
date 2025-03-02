@@ -22,6 +22,23 @@ class _EducationPageState extends State<EducationPage> {
   DateTime? startDate;
   DateTime? endDate;
 
+  // Add these lists for dropdown options
+  final List<String> _degrees = [
+    'High School Diploma',
+    'Associate\'s Degree',
+    'Bachelor\'s Degree',
+    'Master\'s Degree',
+    'Doctorate (Ph.D.)',
+    'MBA',
+    'Professional Certification',
+    'Other',
+  ];
+
+  List<String> _generateYearList() {
+    final currentYear = DateTime.now().year;
+    return List.generate(50, (index) => (currentYear - index).toString());
+  }
+
   void _addEducation() {
     setState(() {
       _education.add({
@@ -38,7 +55,7 @@ class _EducationPageState extends State<EducationPage> {
   void _submitForm() {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
-      
+
       // Add education to userInfo
       final updatedUserInfo = {...widget.userInfo};
       updatedUserInfo['education'] = _education;
@@ -47,10 +64,11 @@ class _EducationPageState extends State<EducationPage> {
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => OtherInformationPage(
-            userInfo: updatedUserInfo,
-            selectedTemplate: widget.selectedTemplate,
-          ),
+          builder:
+              (context) => OtherInformationPage(
+                userInfo: updatedUserInfo,
+                selectedTemplate: widget.selectedTemplate,
+              ),
         ),
       );
     }
@@ -58,6 +76,8 @@ class _EducationPageState extends State<EducationPage> {
 
   @override
   Widget build(BuildContext context) {
+    final yearsList = _generateYearList();
+
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
@@ -74,165 +94,242 @@ class _EducationPageState extends State<EducationPage> {
           ),
         ],
       ),
-      body: Column(
-        children: [
-          // Progress indicator
-          Container(
-            padding: EdgeInsets.all(16),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: List.generate(
-                5,
-                (index) => Container(
-                  margin: EdgeInsets.symmetric(horizontal: 4),
-                  width: 10,
-                  height: 10,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: index == 2 ? Colors.black : Colors.grey[300],
+      body: Form(
+        key: _formKey,
+        child: Column(
+          children: [
+            // Progress indicator
+            Container(
+              padding: EdgeInsets.all(16),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: List.generate(
+                  5,
+                  (index) => Container(
+                    margin: EdgeInsets.symmetric(horizontal: 4),
+                    width: 10,
+                    height: 10,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: index == 2 ? Colors.black : Colors.grey[300],
+                    ),
                   ),
                 ),
               ),
             ),
-          ),
-          Expanded(
-            child: SingleChildScrollView(
-              padding: EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Education Details',
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  SizedBox(height: 20),
-                  // School field
-                  TextField(
-                    decoration: InputDecoration(
-                      filled: true,
-                      fillColor: Colors.grey[200],
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                        borderSide: BorderSide.none,
+            Expanded(
+              child: SingleChildScrollView(
+                padding: EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Education Details',
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
                       ),
-                      hintText: 'School',
                     ),
-                  ),
-                  SizedBox(height: 16),
-                  // Date selection
-                  Row(
-                    children: [
-                      Expanded(
-                        child: DropdownButtonFormField(
-                          decoration: InputDecoration(
-                            filled: true,
-                            fillColor: Colors.grey[200],
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(8),
-                              borderSide: BorderSide.none,
+                    SizedBox(height: 20),
+                    // School field
+                    TextFormField(
+                      decoration: InputDecoration(
+                        filled: true,
+                        fillColor: Colors.grey[200],
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: BorderSide.none,
+                        ),
+                        hintText: 'School',
+                      ),
+                      onSaved: (value) {
+                        if (_education.isEmpty) {
+                          _education.add({
+                            'school': value ?? '',
+                            'degree': '',
+                            'field': '',
+                            'startDate': startDate?.toString() ?? '',
+                            'endDate': endDate?.toString() ?? '',
+                            'description': '',
+                          });
+                        } else {
+                          _education[0]['school'] = value ?? '';
+                        }
+                      },
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please enter school name';
+                        }
+                        return null;
+                      },
+                    ),
+                    SizedBox(height: 16),
+                    // Date selection
+                    Row(
+                      children: [
+                        Expanded(
+                          child: DropdownButtonFormField<String>(
+                            decoration: InputDecoration(
+                              filled: true,
+                              fillColor: Colors.grey[200],
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(8),
+                                borderSide: BorderSide.none,
+                              ),
                             ),
+                            hint: Text('Start Date'),
+                            items:
+                                yearsList.map((String year) {
+                                  return DropdownMenuItem<String>(
+                                    value: year,
+                                    child: Text(year),
+                                  );
+                                }).toList(),
+                            onChanged: (String? value) {
+                              setState(() {
+                                if (value != null) {
+                                  startDate = DateTime(int.parse(value));
+                                }
+                              });
+                            },
                           ),
-                          hint: Text('Start Date'),
-                          items: [], // Add your date items
-                          onChanged: (value) {},
+                        ),
+                        SizedBox(width: 16),
+                        Expanded(
+                          child: DropdownButtonFormField<String>(
+                            decoration: InputDecoration(
+                              filled: true,
+                              fillColor: Colors.grey[200],
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(8),
+                                borderSide: BorderSide.none,
+                              ),
+                            ),
+                            hint: Text('End Date'),
+                            items:
+                                [...yearsList, 'Present'].map((String year) {
+                                  return DropdownMenuItem<String>(
+                                    value: year,
+                                    child: Text(year),
+                                  );
+                                }).toList(),
+                            onChanged: (String? value) {
+                              setState(() {
+                                if (value != null && value != 'Present') {
+                                  endDate = DateTime(int.parse(value));
+                                }
+                              });
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 16),
+                    // Subject field
+                    TextFormField(
+                      decoration: InputDecoration(
+                        filled: true,
+                        fillColor: Colors.grey[200],
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: BorderSide.none,
+                        ),
+                        hintText: 'Subject',
+                      ),
+                      onSaved: (value) {
+                        if (!_education.isEmpty) {
+                          _education[0]['field'] = value ?? '';
+                        }
+                      },
+                    ),
+                    SizedBox(height: 16),
+                    // Degree field
+                    DropdownButtonFormField<String>(
+                      decoration: InputDecoration(
+                        filled: true,
+                        fillColor: Colors.grey[200],
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: BorderSide.none,
                         ),
                       ),
-                      SizedBox(width: 16),
-                      Expanded(
-                        child: DropdownButtonFormField(
-                          decoration: InputDecoration(
-                            filled: true,
-                            fillColor: Colors.grey[200],
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(8),
-                              borderSide: BorderSide.none,
-                            ),
-                          ),
-                          hint: Text('End Date'),
-                          items: [], // Add your date items
-                          onChanged: (value) {},
+                      hint: Text('Degree'),
+                      items:
+                          _degrees.map((String degree) {
+                            return DropdownMenuItem<String>(
+                              value: degree,
+                              child: Text(degree),
+                            );
+                          }).toList(),
+                      onChanged: (String? value) {
+                        setState(() {
+                          if (value != null) {
+                            if (!_education.isEmpty) {
+                              _education[0]['degree'] = value;
+                            }
+                          }
+                        });
+                      },
+                      onSaved: (value) {
+                        if (!_education.isEmpty) {
+                          _education[0]['degree'] = value ?? '';
+                        }
+                      },
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please select a degree';
+                        }
+                        return null;
+                      },
+                    ),
+                    SizedBox(height: 16),
+                    // Description field
+                    TextFormField(
+                      maxLines: 4,
+                      decoration: InputDecoration(
+                        filled: true,
+                        fillColor: Colors.grey[200],
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: BorderSide.none,
                         ),
+                        hintText:
+                            'Add a description of your course to explain what you learned & satisfied to potential employers',
                       ),
-                    ],
-                  ),
-                  SizedBox(height: 16),
-                  // Subject field
-                  TextField(
-                    decoration: InputDecoration(
-                      filled: true,
-                      fillColor: Colors.grey[200],
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                        borderSide: BorderSide.none,
-                      ),
-                      hintText: 'Subject',
+                      onSaved: (value) {
+                        if (!_education.isEmpty) {
+                          _education[0]['description'] = value ?? '';
+                        }
+                      },
                     ),
-                  ),
-                  SizedBox(height: 16),
-                  // Degree field
-                  DropdownButtonFormField(
-                    decoration: InputDecoration(
-                      filled: true,
-                      fillColor: Colors.grey[200],
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                        borderSide: BorderSide.none,
-                      ),
-                    ),
-                    hint: Text('Degree'),
-                    items: [], // Add your degree items
-                    onChanged: (value) {},
-                  ),
-                  SizedBox(height: 16),
-                  // Description field
-                  TextField(
-                    maxLines: 4,
-                    decoration: InputDecoration(
-                      filled: true,
-                      fillColor: Colors.grey[200],
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                        borderSide: BorderSide.none,
-                      ),
-                      hintText: 'Add a description of your course to explain what you learned & satisfied to potential employers',
-                    ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
-          ),
-          // Next step button
-          Padding(
-            padding: EdgeInsets.all(16),
-            child: ElevatedButton(
-              onPressed: () {
-                // Navigate to next page
-                Navigator.pushNamed(context, '/other_information');
-              },
-              child: Container(
-                width: double.infinity,
-                padding: EdgeInsets.symmetric(vertical: 16),
+            // Next step button with improved styling
+            Container(
+              padding: EdgeInsets.all(16),
+              child: ElevatedButton(
+                onPressed: _submitForm,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.black,
+                  minimumSize: Size(double.infinity, 48),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
                 child: Text(
                   'Next step',
-                  textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
+                    color: Colors.white,
                   ),
                 ),
               ),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.black,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -307,4 +404,4 @@ class _EducationPageState extends State<EducationPage> {
       ),
     );
   }
-} 
+}
